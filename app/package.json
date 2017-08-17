@@ -1,0 +1,12 @@
+{
+  "name": "email_to_trello",
+  "product-Name": "Email to Trello",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "electron-default-menu": "^1.0.1",
+    "macaddress": "^0.2.8",
+    "nodemailer": "^4.0.1"
+  }
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <!-- build:css stylesheets/vendor.css -->
+  <!-- bower:css -->
+  <!-- endbower -->
+  <!-- endbuild -->
+  <link rel="stylesheet" href="stylesheets/application.css" />
+  <link rel="stylesheet" href="stylesheets/preferences.css" />
+
+  <!-- build:js javascripts/vendor.js -->
+  <!-- bower:js -->
+  <!-- endbower -->
+  <!-- endbuild -->
+  <script>
+  const prefs = require('./javascripts/preferences');
+  prefs.load_data();
+  </script>
+
+</head>
+<body>
+  <div class="main">
+    <h1>Preferences</h1>
+
+    <div class="input_unit">
+      <label for="trello_email">Trello Email: </label>
+      <input type="text" id="trello_email" />
+      <br   />
+    </div>
+
+    <div class="input_unit">
+      <label for="email">Your Email: </label>
+      <input type="text" id="email" />
+      <br   />
+    </div>
+
+    <div class="input_unit">
+      <label for="smtp">SMTP server address: </label>
+      <input type="text" id="smtp" />
+      <br   />
+      <a id="aboutsmtp" onclick="window.open('http://www.serversmtp.com/en/smtp-server-address')"> What is my SMTP server address? </a>
+      <br   />
+    </div>
+
+    <div class="input_unit">
+      <label for="passwd">Email password: </label>
+      <input type="password" id="passwd" />
+      <br   />
+    </div>
+    <button class="btn btn-success", onclick="prefs.save_data()">Save</button>
+    <p id="notif"></p>
+
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "Whee",
+  "private": true,
+  "version": "0.0.0",
+  "dependencies": {
+    "jquery": "~2.2.3",
+    "bootstrap": "^3.3.7"
+  },
+  "devDependencies": {},
+  "overrides": {
+  "bootstrap": {
+    "main": [
+      "dist/js/bootstrap.js",
+      "dist/css/bootstrap.css",
+      "less/bootstrap.less"
+    ]
+  }
+}
+}
