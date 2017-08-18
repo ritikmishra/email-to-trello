@@ -111,15 +111,16 @@ gulp.task('package:nobuild', function() {
 gulp.task('package', gulp.series('build-heavy', 'package:nobuild'))
 
 gulp.task('release:zip', $.shell.task([
+  'zip -r ./releases/email_to_trello-win32-x64.zip ./releases/email_to_trello-win32-x64',
   'zip -r ./releases/email_to_trello-linux-x64 ./releases/email_to_trello-linux-x64',
-  'zip -r ./releases/email_to_trello-darwin-x64 ./releases/email_to_trello-darwin-x64',
-  'zip -r ./releases/email_to_trello-win32-x64.zip ./releases/email_to_trello-win32-x64'
+  'zip -r ./releases/email_to_trello-darwin-x64 ./releases/email_to_trello-darwin-x64'
 ]))
 
 // the release tasks are sort of janky
 // -- ritikmishra, the author of these janky release scripts
+var upload_url
 
-gulp.task('release:create', function(){
+gulp.task('release:create', function(done){
   var options = {
     uri: 'https://api.github.com/repos/ritikmishra/email-to-trello/releases',
     headers: {
@@ -127,7 +128,7 @@ gulp.task('release:create', function(){
     },
     json: true // Automatically stringifies the body to JSON
   }
-  return request(options)
+  request(options)
     .then((data) => {
       var last_release = data[0]
       var last_tag = last_release.tag_name
@@ -144,40 +145,37 @@ gulp.task('release:create', function(){
         json: true
       }
       request(options).auth(process.env.USERNAME, process.env.TOKEN, true)
+        .then((data) => {
+          upload_url = data.upload_url
+          done()
+        })
         .catch((err) => {
           console.error(err)
+          done()
         })
     })
     .catch((err) => {
       console.error(err)
+      done()
     })
 
 
 })
 
-gulp.task('release:upload', function(){
-  var options = {
-    uri: 'https://api.github.com/repos/ritikmishra/email-to-trello/releases',
-    headers: {
-      "User-Agent": process.env.USERNAME
-    },
-    json: true // Automatically stringifies the body to JSON
-  }
-  return request(options)
-    .then((data) => {
-      var release = data[0]
+gulp.task('release:upload',  function(done){
+
       var filenames = {
         win: "./releases/email_to_trello-win32-x64.zip",
         darwin: "./releases/email_to_trello-darwin-x64.zip",
         linux: "./releases/email_to_trello-linux-x64.zip"
       }
       var upload = {
-        win: parser.parse(release.upload_url).expand({name: "email_to_trello-win32-x64.zip", label: "Windows x64"}),
-        darwin: parser.parse(release.upload_url).expand({name: "email_to_trello-darwin-x64.zip", label: "MacOS x64"}),
-        linux: parser.parse(release.upload_url).expand({name: "email_to_trello-linux-x64.zip", label: "Linux x64"})
+        win: parser.parse(upload_url).expand({name: "email_to_trello-win32-x64.zip", label: "Windows x64"}),
+        darwin: parser.parse(upload_url).expand({name: "email_to_trello-darwin-x64.zip", label: "MacOS x64"}),
+        linux: parser.parse(upload_url).expand({name: "email_to_trello-linux-x64.zip", label: "Linux x64"})
       }
 
-      options = {
+      var options = {
         method: 'POST',
         uri: null,
         url: null,
@@ -214,41 +212,57 @@ gulp.task('release:upload', function(){
       options_linux.url = upload.linux
       options_linux.headers['Content-Length'] = sizes.linux
 
+      var promises = []
 
       // console.log(options_win)
-      fs.createReadStream(filenames.win)
-        .pipe(req.post(options_win, function(error, response, body){
-          console.error(error);
-          console.log(response.statusCode)
-          console.log(body)
-        }))
+      promises.push(
+        new Promise(function(resolve, reject){
+          fs.createReadStream(filenames.win)
+            .pipe(req.post(options_win, function(error, response, body){
+              if(error) {reject(error);}
+              else { resolve({code: response.statusCode, body: body})}
+            }))
+        })
+      )
+
 
       // console.log(options_darwin)
-      fs.createReadStream(filenames.darwin)
-        .pipe(req.post(options_darwin, function(error, response, body){
-          console.error(error);
-          console.log(response.statusCode)
-          console.log(body)
-        }))
+      promises.push(
+        new Promise(function(resolve, reject){
+          fs.createReadStream(filenames.darwin)
+            .pipe(req.post(options_darwin, function(error, response, body){
+              if(error) {reject(error);}
+              else { resolve({code: response.statusCode, body: body})}
+            }))
+        })
+      )
 
       // console.log(options_linux)
-      fs.createReadStream(filenames.linux)
-        .pipe(req.post(options_linux, function(error, response, body){
-          console.error(error);
-          console.log(response.statusCode)
-          console.log(body)
-        }))
+      promises.push(
+        new Promise(function(resolve, reject){
+          fs.createReadStream(filenames.linux)
+            .pipe(req.post(options_linux, function(error, response, body){
+              if(error) {reject(error);}
+              else { resolve({code: response.statusCode, body: body})}
+            }))
+        })
+      )
 
-    })
-    .catch((err) => {
-      console.error(err)
-    })
+      Promise.all(promises)
+        .then((data) => {
+          console.log(data)
+          done()
+        })
+        .catch((err) => {
+          console.error(err)
+          done()
+        })
 
 })
 
 gulp.task('release', function(done){
 
-  if(process.env.TRAVIS_BRANCH === "master" && process.env.TRAVIS_PULL_REQUEST === "false")
+  if(process.env.TRAVIS_BRANCH === "master" && process.env.TRAVIS_PULL_REQUEST === "false" && process.env.TRAVIS_TAG[0] !== "v")
   {
     gulp.series('release:zip', 'release:create', 'release:upload')()
     done()

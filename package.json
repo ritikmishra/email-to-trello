@@ -47,9 +47,10 @@
     "overwrite": true,
     "destination": "./releases",
     "platforms": [
+      "win32-x64",
       "darwin-x64",
-      "linux-x64",
-      "win32-x64"
+      "linux-x64"
+
     ],
     "platformResources": {
       "darwin": {
