@@ -112,7 +112,7 @@ gulp.task('package', gulp.series('build-heavy', 'package:nobuild'))
 
 gulp.task('release:zip', $.shell.task([
   'zip -r ./releases/email_to_trello-linux-x64 ./releases/email_to_trello-linux-x64',
-  'zip -r ./releases/email_to_trello-darwin-x64 ./releases/email_to_trello-darwin-x64'
+  'zip -r ./releases/email_to_trello-darwin-x64 ./releases/email_to_trello-darwin-x64',
   'zip -r /releases/email_to_trello-win32-x64.zip /releases/email_to_trello-win32-x64'
 ]))
 
