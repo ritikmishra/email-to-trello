@@ -1,14 +1,22 @@
 'use strict'
 require('coffee-script/register')
 
+// this
+
 var gulp = require('gulp')
+var request = require('request-promise-native')
 var del = require('del')
 var runSequence = require('run-sequence')
 var gulpLoadPlugins = require('gulp-load-plugins')
 var packageJSON = require('./package.json')
+var parser = require('uri-template');
+var fs = require('fs')
+var req = require('request')
 
 var $ = gulpLoadPlugins()
 var browserify = require('gulp-browserify');
+
+
 
 gulp.task('images', function () {
   return gulp.src('app/images/**/*')
@@ -102,32 +110,153 @@ gulp.task('package:nobuild', function() {
 
 gulp.task('package', gulp.series('build-heavy', 'package:nobuild'))
 
-gulp.task('package:darwin', function() {
-  let options = {}
-  options.name = packageJSON.name
-  options.version = packageJSON.version
-  options.packaging = packageJSON.packaging
-  options.packaging.platforms = ['darwin-x64']
-  return gulp.src('./dist')
-    .pipe($.electronPacker(options))
+gulp.task('release:zip', $.shell.task([
+  'zip -r ./releases/email_to_trello-linux-x64 ./releases/email_to_trello-linux-x64',
+  'zip -r ./releases/email_to_trello-darwin-x64 ./releases/email_to_trello-darwin-x64'
+  // 'zip -r /releases/email_to_trello-win64-64.zip /releases/email_to_trello-win64-64'
+]))
+
+// the release tasks are sort of janky
+// -- ritikmishra, the author of these janky release scripts
+
+gulp.task('release:create', function(){
+  var options = {
+    uri: 'https://api.github.com/repos/ritikmishra/email-to-trello/releases',
+    headers: {
+      "User-Agent": process.env.USERNAME
+    },
+    json: true // Automatically stringifies the body to JSON
+  }
+  return request(options)
+    .then((data) => {
+      var last_release = data[0]
+      var last_tag = last_release.tag_name
+      var tag = last_tag.split('.')[0] + '.' + (parseInt(last_tag.split('.')[1]) + 1)
+      options = {
+        method: 'POST',
+        uri: 'https://api.github.com/repos/ritikmishra/email-to-trello/releases',
+        body: {
+            "tag_name": tag
+        },
+        headers: {
+            'User-Agent': process.env.USERNAME
+        },
+        json: true
+      }
+      request(options).auth(process.env.USERNAME, process.env.TOKEN, true)
+        .catch((err) => {
+          console.error(err)
+        })
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+
+
 })
 
-gulp.task('package:win64', function() {
-  let options = {}
-  options.name = packageJSON.name
-  options.version = packageJSON.version
-  options.packaging = packageJSON.packaging
-  options.packaging.platforms = ['win64-64']
-  return gulp.src('./dist')
-    .pipe($.electronPacker(options))
+gulp.task('release:upload', function(){
+  var options = {
+    uri: 'https://api.github.com/repos/ritikmishra/email-to-trello/releases',
+    headers: {
+      "User-Agent": process.env.USERNAME
+    },
+    json: true // Automatically stringifies the body to JSON
+  }
+  return request(options)
+    .then((data) => {
+      var release = data[0]
+      var filenames = {
+        win: "./releases/email_to_trello-win64-64.zip",
+        darwin: "./releases/email_to_trello-darwin-x64.zip",
+        linux: "./releases/email_to_trello-linux-x64.zip"
+      }
+      var upload = {
+        win: parser.parse(release.upload_url).expand({name: "email_to_trello-win64-64.zip", label: "Windows x64"}),
+        darwin: parser.parse(release.upload_url).expand({name: "email_to_trello-darwin-x64.zip", label: "MacOS x64"}),
+        linux: parser.parse(release.upload_url).expand({name: "email_to_trello-linux-x64.zip", label: "Linux x64"})
+      }
+
+      options = {
+        method: 'POST',
+        uri: null,
+        url: null,
+        headers: {
+            'User-Agent': process.env.USERNAME,
+            'Content-Type': "application/zip",
+            'Content-Length': 3
+        },
+        json: true,
+        auth: {
+          user: process.env.USERNAME,
+          pass: process.env.TOKEN,
+          sendImmediately: true
+        }
+      }
+
+      var sizes = {
+        win: fs.statSync(filenames.win).size,
+        darwin: fs.statSync(filenames.darwin).size,
+        linux: fs.statSync(filenames.linux).size
+      }
+
+
+      var options_win, options_darwin, options_linux
+      options_win = JSON.parse(JSON.stringify(options))
+      options_darwin = JSON.parse(JSON.stringify(options))
+      options_linux = JSON.parse(JSON.stringify(options))
+      options_win.url = upload.win
+      options_win.headers['Content-Length'] = sizes.win
+
+      options_darwin.url = upload.darwin
+      options_darwin.headers['Content-Length'] = sizes.darwin
+
+      options_linux.url = upload.linux
+      options_linux.headers['Content-Length'] = sizes.linux
+
+
+      // console.log(options_win)
+      fs.createReadStream(filenames.win)
+        .pipe(req.post(options_win, function(error, response, body){
+          console.error(error);
+          console.log(response.statusCode)
+          console.log(body)
+        }))
+
+      // console.log(options_darwin)
+      fs.createReadStream(filenames.darwin)
+        .pipe(req.post(options_darwin, function(error, response, body){
+          console.error(error);
+          console.log(response.statusCode)
+          console.log(body)
+        }))
+
+      // console.log(options_linux)
+      fs.createReadStream(filenames.linux)
+        .pipe(req.post(options_linux, function(error, response, body){
+          console.error(error);
+          console.log(response.statusCode)
+          console.log(body)
+        }))
+
+    })
+    .catch((err) => {
+      console.error(err)
+    })
+
 })
 
-gulp.task('package:linux', function() {
-  let options = {}
-  options.name = packageJSON.name
-  options.version = packageJSON.version
-  options.packaging = packageJSON.packaging
-  options.packaging.platforms = ['linux-x64']
-  return gulp.src('./dist')
-    .pipe($.electronPacker(options))
+gulp.task('release', function(done){
+
+  if(process.env.TRAVIS_BRANCH === "master" && process.env.TRAVIS_PULL_REQUEST === "false")
+  {
+    gulp.series('release:zip', 'release:create', 'release:upload')()
+    done()
+  }
+  else {
+    console.log("Not authorized to make a new release.")
+    done()
+  }
 })
+
+gulp.task('release-travis', gulp.series('package', 'release:zip', 'release:create', 'release:upload'))

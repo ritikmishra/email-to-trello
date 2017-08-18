@@ -1,4 +1,5 @@
 
+[![Build Status](https://travis-ci.org/ritikmishra/email-to-trello.svg?branch=master)](https://travis-ci.org/ritikmishra/email-to-trello)
 # Email to Trello
 
 At school, towards the end of class, my teachers will rattle off all the homework that we have to complete. I use Trello to keep track of assignments, due dates, how complete they are, and so on. Unfortunately, adding a description in the Trello website requires creating a card and clicking on it first. By the time that I have done so, my teachers will already have moved on to describing the next assignment.

@@ -30,7 +30,11 @@
     "gulp-watch": "^4.3.5",
     "gulp-wiredep": "0.0.0",
     "gulp-wrap": "^0.11.0",
-    "run-sequence": "^1.1.5"
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1",
+    "request-promise-native": "^1.0.4",
+    "run-sequence": "^1.1.5",
+    "uri-template": "^1.0.1"
   },
   "dependencies": {
     "macaddress": "^0.2.8",
@@ -43,8 +47,8 @@
     "destination": "./releases",
     "platforms": [
       "darwin-x64",
-      "linux-x64"
-
+      "linux-x64",
+      "win64-64"
     ],
     "platformResources": {
       "darwin": {
