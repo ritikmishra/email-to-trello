@@ -113,7 +113,7 @@ gulp.task('package', gulp.series('build-heavy', 'package:nobuild'))
 gulp.task('release:zip', $.shell.task([
   'zip -r ./releases/email_to_trello-linux-x64 ./releases/email_to_trello-linux-x64',
   'zip -r ./releases/email_to_trello-darwin-x64 ./releases/email_to_trello-darwin-x64'
-  // 'zip -r /releases/email_to_trello-win64-64.zip /releases/email_to_trello-win64-64'
+  'zip -r /releases/email_to_trello-win32-x64.zip /releases/email_to_trello-win32-x64'
 ]))
 
 // the release tasks are sort of janky
@@ -167,12 +167,12 @@ gulp.task('release:upload', function(){
     .then((data) => {
       var release = data[0]
       var filenames = {
-        win: "./releases/email_to_trello-win64-64.zip",
+        win: "./releases/email_to_trello-win32-x64.zip",
         darwin: "./releases/email_to_trello-darwin-x64.zip",
         linux: "./releases/email_to_trello-linux-x64.zip"
       }
       var upload = {
-        win: parser.parse(release.upload_url).expand({name: "email_to_trello-win64-64.zip", label: "Windows x64"}),
+        win: parser.parse(release.upload_url).expand({name: "email_to_trello-win32-x64.zip", label: "Windows x64"}),
         darwin: parser.parse(release.upload_url).expand({name: "email_to_trello-darwin-x64.zip", label: "MacOS x64"}),
         linux: parser.parse(release.upload_url).expand({name: "email_to_trello-linux-x64.zip", label: "Linux x64"})
       }
