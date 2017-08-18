@@ -7,6 +7,10 @@ env:
   - secure: bgxXtgQk6/Ga5R81hbZFDQQYC9hdFVl+M6BLcCIzpk9WSGTSyUn0NZbZyRfrF3UcPMGmELMcDGcTlkF5VQjHSf3YtEITNm7C7ibzOIu3ItcjPJHJdi4sReBDnyZV7aop8kj4SYDuaRdL2yzSkkURwPpjuUg/q38N8AEbxASZOaJIT9sZ4vZXItDQyevVhl/tnTtJGut+BY2HppQfcL7HJpjXorzGxTqVGKqVMuH4Lo8Kzrr6QuHcajTUsjmo5++2fjTiZkO000Fai0y4MI63mHQJip4YwEW0LL2Q5cto8k8OCGkDGzuhY2hEYD6glrG+815qIFMRNHexXS8vWFY+03plTkp+8fb25oB3bcW8540KdCYim9ekzqzO0wIZTIUhJ36w8XTsAfrta6asJb8tJMNIpEeMJml7BimcLYIHsUHVJTnoZfLlfVCrBRRa3dDEbOp7pNgnijeVfTXocc/lfK2C9FPVBZXNS0GOGFm+skAyV2Ezy3FRU5fDBZ6eqGNEuJvWjcr6c5fRHxAHwba5Q381d6MMDctpQtQJS9RirV5ps7gaEbm2HQ3dhsfd8ilCeIa3aC+SKviFbf8Md6E8b/GCjpIFqivdI4xll6gUYi6YwbpI5QGuqJGLvkzowPQ3tvb5RPqrKnZ5b7+nsdjAdXyJ5Sk7L5NPk2O6hpPK/E8=
 
 before_install:
+  - echo Tag -- $TRAVIS_TAG
+  - echo Branch -- $TRAVIS_BRANCH
+  - echo Pull Request -- $TRAVIS_PULL_REQUEST
+  - echo "help"
   - sudo dpkg --add-architecture i386
   - wget https://dl.winehq.org/wine-builds/Release.key
   - sudo apt-key add Release.key
