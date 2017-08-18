@@ -16,8 +16,8 @@ before_install:
 
 install:
   - npm install
-  - bower install
+  - ./node_modules/bower/bin/bower install
 
 script:
   - wine --version
-  - gulp release-travis
+  - ./node_modules/gulp/bin/gulp.js release-travis

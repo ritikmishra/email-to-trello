@@ -11,6 +11,7 @@
     "start": "npm run build && npm run watch"
   },
   "devDependencies": {
+    "bower": "^1.8.0",
     "del": "^2.2.0",
     "electron-prebuilt": "~0.37.5",
     "electron-rebuild": "^1.6.0",
