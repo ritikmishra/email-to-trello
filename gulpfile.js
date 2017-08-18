@@ -260,11 +260,10 @@ gulp.task('release:upload',  function(done){
 
 })
 
-gulp.task('release', function(done){
-
+gulp.task('release-travis', function(done){
   if(process.env.TRAVIS_BRANCH === "master" && process.env.TRAVIS_PULL_REQUEST === "false" && process.env.TRAVIS_TAG[0] !== "v")
   {
-    gulp.series('release:zip', 'release:create', 'release:upload')()
+    gulp.series('package', 'release:zip', 'release:create', 'release:upload')()
     done()
   }
   else {
@@ -272,5 +271,3 @@ gulp.task('release', function(done){
     done()
   }
 })
-
-gulp.task('release-travis', gulp.series('package', 'release:zip', 'release:create', 'release:upload'))
