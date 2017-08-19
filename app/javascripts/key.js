@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const os = require('os');
 const macaddress = require('macaddress');
+const mac_promise = require('./macaddress');
 
 function sha512(data)
 {
@@ -30,5 +31,28 @@ function giveKey(cb)
   }
 }
 
+function giveKeyPromise()
+{
+  return new Promise((fulfill, reject) => {
+    try {
+      var OSName = os.type();
+      var OSVersion = os.release();
+      var CPUModel = os.cpus()[0].model;
 
-module.exports = giveKey;
+      mac_promise.one()
+        .then((MACaddress) => {
+          fulfill(sha512(OSName+OSVersion+CPUModel+MACaddress));
+        })
+        .catch((error) => {
+          reject(error)
+        })
+    } catch (e) {
+      reject(e);
+    }
+  })
+}
+
+module.exports = {
+  giveKey: giveKey,
+  giveKeyPromise: giveKeyPromise
+};

@@ -2,7 +2,7 @@ const crypt = require('./crypt');
 
 var iv, text
 
-crypt.encrypt('aaaaaaaaaaaaaaaaa', function(err, data) {
+crypt.encrypt('less_than_16', function(err, data) {
   if (err) throw err;
   iv = data.iv;
   text = data.text;
@@ -15,3 +15,12 @@ crypt.encrypt('aaaaaaaaaaaaaaaaa', function(err, data) {
     console.log(data);
   })
 })
+
+
+crypt.encrypt_promise('c38cce65951ea51f137ac62d6b74b815')
+  .then((data) => {
+    crypt.decrypt_promise(data.text, data.iv)
+      .then(console.log)
+      .catch((err) => {throw err})
+  })
+  .catch((err) => {throw err})
