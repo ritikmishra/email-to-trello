@@ -24,4 +24,6 @@ install:
 
 script:
   - wine --version
+  - ./node_modules/gulp/bin/gulp.js build-heavy
+  - npm test
   - ./node_modules/gulp/bin/gulp.js release-travis
