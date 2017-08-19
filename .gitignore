@@ -5,3 +5,9 @@ bower_components
 .DS_Store
 .editorconfig
 **/jasmine_examples
+
+
+## WebStorm stuffs
+
+.idea
+.editorconfig
